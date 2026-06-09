@@ -2,13 +2,12 @@ name: Colab Cron Replacement
 
 on:
   schedule:
-    - cron: "*/8 * * * *"   # every 8 minutes
-  workflow_dispatch:         # manual trigger button
+    - cron: "*/30 * * * *"    # Every 30 minutes (more stable)
+  workflow_dispatch:
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -18,8 +17,12 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Install dependencies
+        run: |
+          pip install tensorflow keras
+
       - name: Run script
-        run: python script.py
+        run: python script.py train --data /path/to/your/dataset   # ← Change this path
 
       - name: Show log output
-        run: cat log.txt
+        run: cat log.txt || echo "No log.txt found"
