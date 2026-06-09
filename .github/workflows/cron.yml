@@ -2,14 +2,15 @@ name: Colab Cron Replacement
 
 on:
   schedule:
-    - cron: "*/30 * * * *"    # Every 30 minutes (more stable)
-  workflow_dispatch:
+    - cron: "*/30 * * * *"    # Runs every 30 minutes (recommended for stability)
+  workflow_dispatch:          # Allows manual trigger
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -19,10 +20,22 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install tensorflow keras
+          pip install --upgrade pip
+          pip install tensorflow keras pillow
 
-      - name: Run script
-        run: python script.py train --data /path/to/your/dataset   # ← Change this path
+      - name: Run Deepfake Training Script
+        run: python script.py train --data "Dataset for MLDL" --epochs 8 --validation-split 0.2
 
-      - name: Show log output
-        run: cat log.txt || echo "No log.txt found"
+      - name: Show training output
+        run: |
+          echo "=== Training completed ==="
+          ls -la artifacts/ || echo "Artifacts folder not found"
+          echo "Check the logs above for model training details."
+
+      - name: Upload model as artifact (optional)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deepfake-model
+          path: artifacts/
+          retention-days: 7
